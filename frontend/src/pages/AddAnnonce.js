@@ -6,8 +6,7 @@ import Footer from '../components/Footer';
 const AddAnnonce = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [type, setType] = useState("book"); // default type
+  const [type, setType] = useState("Course");
   const [coverImage, setCoverImage] = useState(null);
   const [pdfFile, setPdfFile] = useState(null);
 
@@ -16,44 +15,44 @@ const AddAnnonce = () => {
   const [level, setLevel] = useState("");
   const [specialty, setSpecialty] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const formData = new FormData();
-    formData.append("titre", title);  // match Java field
-    formData.append("prix", price);   // match Java field
-
-    formData.append("description", description);
-
-    formData.append("type", type);
-    formData.append("coverImage", coverImage);
-    formData.append("pdfFile", pdfFile);
-
-    if (creator) formData.append("creator", creator);
-    if (creationDate) formData.append("creationDate", creationDate);
-    if (level) formData.append("level", level);
-    if (specialty) formData.append("specialty", specialty);
-
-    try {
-      await addAnnonce(formData);
-      alert("✅ Annonce added successfully!");
-
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setPrice("");
-      setType("book");
-      setCoverImage(null);
-      setPdfFile(null);
-      setCreator("");
-      setCreationDate("");
-      setLevel("");
-      setSpecialty("");
-    } catch (error) {
-      alert("❌ Failed to add annonce");
-      console.error(error);
-    }
+  const streamOptions = {
+    "1": ["Scientific", "Literary"],
+    "2": ["Literary/Philosophy", "Foreign Languages", "Common Streams"],
+    "3": ["Literary/Philosophy", "Foreign Languages", "Common Streams"],
   };
+
+ const handleSubmit = async (e) => {
+   e.preventDefault();
+
+   if (!title || !description || !type || !level || !specialty || !coverImage || !pdfFile) {
+     alert("⚠️ Please fill all required fields!");
+     return;
+   }
+
+   const formData = new FormData();
+   formData.append("titre", title);
+   formData.append("description", description);
+   formData.append("prix", 0);
+   formData.append("type", type);
+   formData.append("level", level);       // corrected
+   formData.append("specialty", specialty); // corrected
+   formData.append("coverImage", coverImage);
+   formData.append("pdfFile", pdfFile);
+
+   if (creator) formData.append("creator", creator);
+   if (creationDate) formData.append("creationDate", creationDate);
+
+   try {
+     await addAnnonce(formData);
+     alert("✅ Annonce added successfully!");
+     setTitle(""); setDescription(""); setType("Course");
+     setCoverImage(null); setPdfFile(null); setLevel(""); setSpecialty("");
+     setCreator(""); setCreationDate("");
+   } catch (error) {
+     alert("❌ Failed to add annonce");
+     console.error(error.response?.data || error);
+   }
+ };
 
   return (
     <>
@@ -64,120 +63,68 @@ const AddAnnonce = () => {
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <div className="mb-3">
               <label className="form-label">Title *</label>
-              <input
-                type="text"
-                className="form-control"
-                value={title}
-                onChange={e => setTitle(e.target.value)}
-                required
-              />
+              <input type="text" className="form-control" value={title} onChange={e => setTitle(e.target.value)} required />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Description *</label>
-              <textarea
-                className="form-control"
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                rows="4"
-                required
-              ></textarea>
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Price (DA) *</label>
-              <input
-                type="number"
-                className="form-control"
-                placeholder="0 for free"
-                value={price}
-                onChange={e => setPrice(e.target.value)}
-                required
-              />
+              <textarea className="form-control" rows="4" value={description} onChange={e => setDescription(e.target.value)} required></textarea>
             </div>
 
             <div className="mb-3">
               <label className="form-label">Type *</label>
               <div className="btn-group d-flex" role="group">
-                {["book", "course", "resource", "exam"].map(option => (
-                  <button
-                    key={option}
-                    type="button"
-                    className={`btn btn-outline-primary ${type === option ? 'active' : ''}`}
-                    onClick={() => setType(option)}
-                  >
-                    {option.charAt(0).toUpperCase() + option.slice(1)}
+                {["Course", "Book", "Resource", "Exam"].map(option => (
+                  <button key={option} type="button" className={`btn btn-outline-primary ${type === option ? 'active' : ''}`} onClick={() => setType(option)}>
+                    {option}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="mb-3">
+              <label className="form-label">Level *</label>
+              <select className="form-select" value={level} onChange={e => {setLevel(e.target.value); setSpecialty("");}} required>
+                <option value="">Select Level</option>
+                <option value="1">🎓 First Year</option>
+                <option value="2">📚 Second Year</option>
+                <option value="3">🎯 Third Year</option>
+              </select>
+            </div>
+
+            {level && (
+              <div className="mb-3">
+                <label className="form-label">Specialty *</label>
+                <select className="form-select" value={specialty} onChange={e => setSpecialty(e.target.value)} required>
+                  <option value="">Select Specialty</option>
+                  {streamOptions[level].map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="mb-3">
               <label className="form-label">Cover Image *</label>
-              <input
-                type="file"
-                className="form-control"
-                accept="image/*"
-                onChange={e => setCoverImage(e.target.files[0])}
-                required
-              />
+              <input type="file" className="form-control" accept="image/*" onChange={e => setCoverImage(e.target.files[0])} required />
             </div>
 
             <div className="mb-3">
               <label className="form-label">PDF File *</label>
-              <input
-                type="file"
-                className="form-control"
-                accept="application/pdf"
-                onChange={e => setPdfFile(e.target.files[0])}
-                required
-              />
+              <input type="file" className="form-control" accept="application/pdf" onChange={e => setPdfFile(e.target.files[0])} required />
             </div>
 
-            {/* Optional fields */}
             <div className="mb-3">
               <label className="form-label">Creator (optional)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={creator}
-                onChange={e => setCreator(e.target.value)}
-              />
+              <input type="text" className="form-control" value={creator} onChange={e => setCreator(e.target.value)} />
             </div>
 
             <div className="mb-3">
               <label className="form-label">Creation Date (optional)</label>
-              <input
-                type="date"
-                className="form-control"
-                value={creationDate}
-                onChange={e => setCreationDate(e.target.value)}
-              />
+              <input type="date" className="form-control" value={creationDate} onChange={e => setCreationDate(e.target.value)} />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">Level (optional)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={level}
-                onChange={e => setLevel(e.target.value)}
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label">Specialty (optional)</label>
-              <input
-                type="text"
-                className="form-control"
-                value={specialty}
-                onChange={e => setSpecialty(e.target.value)}
-              />
-            </div>
-
-            <button type="submit" className="btn btn-primary w-100">
-              Add Annonce
-            </button>
+            <button type="submit" className="btn btn-primary w-100">Add Annonce</button>
           </form>
         </div>
       </div>

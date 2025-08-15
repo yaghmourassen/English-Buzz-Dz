@@ -18,6 +18,7 @@ public class AnnonceController {
     @Autowired
     private AnnonceService annonceService;
 
+    // CREATE
     @PostMapping
     public ResponseEntity<Annonce> addAnnonce(
             @RequestParam("titre") String titre,
@@ -39,16 +40,50 @@ public class AnnonceController {
         return ResponseEntity.ok(savedAnnonce);
     }
 
+    // READ ALL
     @GetMapping
     public ResponseEntity<List<Annonce>> getAllAnnonces() {
         return ResponseEntity.ok(annonceService.getAllAnnonces());
     }
 
+    // READ ONE
     @GetMapping("/{id}")
     public ResponseEntity<Annonce> getAnnonceById(@PathVariable String id) {
         Annonce annonce = annonceService.getAnnonceById(id);
         if (annonce != null) {
             return ResponseEntity.ok(annonce);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // UPDATE
+    // In AnnonceController.java
+    @PutMapping("/{id}")
+    public ResponseEntity<Annonce> updateAnnonce(
+            @PathVariable String id,
+            @RequestParam("titre") String titre,
+            @RequestParam("type") String type,
+            @RequestParam(value = "level", required = false) String level,
+            @RequestParam(value = "specialty", required = false) String specialty,
+            @RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
+            @RequestParam(value = "pdfFile", required = false) MultipartFile pdfFile // <-- add this
+    ) throws IOException {
+        Annonce updatedAnnonce = annonceService.updateAnnonce(id, titre, type, level, specialty, coverImage, pdfFile);
+        if (updatedAnnonce != null) {
+            return ResponseEntity.ok(updatedAnnonce);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteAnnonce(@PathVariable String id) {
+        boolean deleted = annonceService.deleteAnnonce(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
         }

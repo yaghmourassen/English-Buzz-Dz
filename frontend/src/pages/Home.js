@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchAnnonces } from "../api/Home";
+import fetchUserById from "../api/Header";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -9,36 +10,85 @@ import '../styles/Home.css';
 function Home() {
   const [annonces, setAnnonces] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [user, setUser] = useState(null);
+
+  const [yearFilter, setYearFilter] = useState(null);
+  const [streamFilter, setStreamFilter] = useState(null);
   const [typeFilter, setTypeFilter] = useState("All");
 
   useEffect(() => {
     fetchAnnonces()
-      .then((data) => {
-        setAnnonces(data);
-        console.log("Fetched annonces:", data);
-      })
+      .then((data) => setAnnonces(data))
       .catch(console.error);
+
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      fetchUserById(storedUserId)
+        .then(setUser)
+        .catch(() => setUser(null));
+    }
   }, []);
 
-  const filtered = annonces.filter((a) => {
-    const matchesSearch = a.titre?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = typeFilter === "All" || a.type?.toLowerCase() === typeFilter.toLowerCase();
-    return matchesSearch && matchesType;
-  });
+const filtered = annonces.filter((a) => {
+  const matchesSearch = a.titre?.toLowerCase().includes(searchTerm.toLowerCase());
 
-  const getTitleByType = () => {
-    switch (typeFilter) {
-      case "Course": return "🎓 Courses";
-      case "Book": return "📚 Books";
-      case "Exam": return "📝 Exams";
-      case "Resource": return "🎥 Resources";
-      default: return "📦 Latest Resources";
+  // Ensure exact match with backend
+  const matchesYear = !yearFilter || a.level === yearFilter;
+  const matchesStream = !streamFilter || a.specialty === streamFilter;
+  const matchesType = typeFilter === "All" || a.type === typeFilter;
+
+  return matchesSearch && matchesYear && matchesStream && matchesType;
+});
+
+
+
+
+  const yearOptions = [
+    { value: "1", label: "🎓 First Year" },
+    { value: "2", label: "📚 Second Year" },
+    { value: "3", label: "🎯 Third Year" },
+  ];
+
+const streamOptions = {
+  "1": [
+    { value: "Scientific", label: "🔬 Scientific" },
+    { value: "Literary", label: "📖 Literary" },
+  ],
+  "2": [
+    { value: "Literary/Philosophy", label: "📚 Literary/Philosophy" },
+    { value: "Foreign Languages", label: "🌐 Foreign Languages" },
+    { value: "Common Streams", label: "🧩 Common Streams" },
+  ],
+  "3": [
+    { value: "Literary/Philosophy", label: "📚 Literary/Philosophy" },
+    { value: "Foreign Languages", label: "🌐 Foreign Languages" },
+    { value: "Common Streams", label: "🧩 Common Streams" },
+  ],
+};
+
+
+  const typeOptions = ["Course", "Book", "Exam", "Resource"];
+
+  const handleYearClick = (y) => {
+    if (yearFilter === y.value) {
+      setYearFilter(null);
+      setStreamFilter(null);
+      setTypeFilter("All");
+    } else {
+      setYearFilter(y.value);
+      setStreamFilter(null);
+      setTypeFilter("All");
     }
   };
 
-  const handleCategoryClick = (typeLabel) => {
-    const type = typeLabel.split(" ")[1]; // e.g. "Courses" -> "Course"
-    setTypeFilter(type === "All" ? "All" : type.slice(0, -1)); // Remove plural 's'
+  const handleStreamClick = (s) => {
+    if (streamFilter === s.value) {
+      setStreamFilter(null);
+      setTypeFilter("All");
+    } else {
+      setStreamFilter(s.value);
+      setTypeFilter("All");
+    }
   };
 
   return (
@@ -46,32 +96,88 @@ function Home() {
       <Header />
 
       {/* Hero Section */}
-<section className="hero text-center py-5">
+      <section className="hero text-center py-5">
         <div className="container">
           <h1 className="display-4 fw-bold">EngyStudy 📚</h1>
-          <p className="lead">Explore courses, books, exams, and resources to boost your academic journey.</p>
-          <Link to="/add-annonce" className="btn btn-primary mt-3">➕ Add File</Link>
+          <p className="lead">Explore resources to boost your academic journey.</p>
+          {user?.role === "ADMIN" && (
+            <Link to="/add-annonce" className="btn btn-primary mt-3">➕ Add File</Link>
+          )}
         </div>
       </section>
 
-      {/* Categories */}
-<section className="categories-section py-4">
+      {/* Categories Section */}
+      <section className="categories-section py-4">
         <div className="container">
           <div className="row text-center">
-            {["🎓 Courses", "📚 Books", "📝 Exams", "🎥 Resources"].map((cat, idx) => (
+            {/* Year Selection */}
+            {!yearFilter && yearOptions.map((y) => (
               <div
-                className={`col-md-3 mb-4 category-box clickable ${typeFilter === cat.split(" ")[1].slice(0, -1) ? 'active' : ''}`}
-                key={idx}
-                onClick={() => handleCategoryClick(cat)}
+                key={y.value}
+                className={`col-md-4 mb-4 category-box clickable ${yearFilter === y.value ? 'active' : ''}`}
+                onClick={() => handleYearClick(y)}
               >
-                {cat}
+                {y.label}
               </div>
             ))}
+
+            {/* Stream Selection */}
+            {yearFilter && !streamFilter && streamOptions[yearFilter].map((s, idx) => (
+              <div
+                key={s.value}
+                className={`category-box clickable ${
+                  yearFilter === "1" ? "col-6 col-md-6 first-year-stream" : "col-md-4"
+                } ${streamFilter === s.value ? 'active' : ''}`}
+                onClick={() => handleStreamClick(s)}
+              >
+                {s.label}
+              </div>
+            ))}
+
+            {/* Type Selection */}
+            {yearFilter && streamFilter && typeOptions.map((t) => (
+              <div
+                key={t}
+                className={`col-md-3 mb-4 category-box clickable ${typeFilter === t ? 'active' : ''}`}
+                onClick={() => setTypeFilter(t)}
+              >
+                {t}
+              </div>
+            ))}
+
+            {/* Back & Clear Buttons */}
+            {(streamFilter || yearFilter || typeFilter !== "All" || searchTerm) && (
+              <div className="col-12 mb-4 text-center d-flex justify-content-center gap-3">
+                <div
+                  onClick={() => {
+                    if (typeFilter !== "All") setTypeFilter("All");
+                    else if (streamFilter) setStreamFilter(null);
+                    else setYearFilter(null);
+                  }}
+                  style={{ cursor: "pointer", color: "#0d6efd" }}
+                >
+                  🔙 Back
+                </div>
+
+                <div
+                  onClick={() => {
+                    setYearFilter(null);
+                    setStreamFilter(null);
+                    setTypeFilter("All");
+                    setSearchTerm("");
+                  }}
+                  style={{ cursor: "pointer", color: "#dc3545" }}
+                >
+                  🧹 Clear
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </section>
 
-      {/* Search and Filter */}
+      {/* Search Bar */}
       <section className="search-bar py-4">
         <div className="container d-flex flex-column flex-md-row gap-3">
           <input
@@ -80,24 +186,15 @@ function Home() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <select
-            className="form-select"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="All">All Types</option>
-            <option value="Course">Courses</option>
-            <option value="Book">Books</option>
-            <option value="Exam">Exams</option>
-            <option value="Resource">Resources</option>
-          </select>
         </div>
       </section>
 
       {/* Annonces List */}
       <section className="py-5">
         <div className="container">
-          <h2 className="mb-4 text-center">{getTitleByType()}</h2>
+          <h2 className="mb-4 text-center">
+            {yearFilter ? `${streamFilter || "Select Stream"}` : "All Resources"}
+          </h2>
           <div className="row">
             {filtered.length === 0 ? (
               <p className="text-center text-muted">No matching results found.</p>
@@ -116,47 +213,19 @@ function Home() {
                     <div className="card-body d-flex flex-column">
                       <h5 className="card-title">{annonce.titre}</h5>
                       <p className="card-text">{annonce.description?.slice(0, 100)}...</p>
-
-                      <p className="card-text fw-bold">
-                        {annonce.prix === 0 ? "Free" : `${annonce.prix} DA`}
-                      </p>
-
-                      {annonce.auteur && (
-                        <p className="card-text"><strong>Author:</strong> {annonce.auteur}</p>
+                      {annonce.pdfFile && (
+                        <a
+                          href={`http://localhost:8080${annonce.pdfFile}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="btn btn-sm btn-outline-primary me-2"
+                        >
+                          View PDF
+                        </a>
                       )}
-                      {annonce.dateCreation && (
-                        <p className="card-text">
-                          <strong>Created:</strong> {new Date(annonce.dateCreation).toLocaleDateString()}
-                        </p>
-                      )}
-                      {annonce.specialite && (
-                        <p className="card-text"><strong>Speciality:</strong> {annonce.specialite}</p>
-                      )}
-                      {annonce.niveau && (
-                        <p className="card-text"><strong>Level:</strong> {annonce.niveau}</p>
-                      )}
-
-                      <div className="text-warning mb-2">
-                        {"★".repeat(4)}<span className="text-muted">★</span>
-                      </div>
-
-                      <span className="badge bg-secondary mb-2">{annonce.type}</span>
-
-                      <div className="mt-auto">
-                        {annonce.pdfFile && (
-                          <a
-                            href={`http://localhost:8080${annonce.pdfFile}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="btn btn-sm btn-outline-primary me-2"
-                          >
-                            View PDF
-                          </a>
-                        )}
-                        <Link to={`/annonce/${annonce.id}`} className="btn btn-sm btn-primary">
-                          View Details
-                        </Link>
-                      </div>
+                      <Link to={`/annonce/${annonce.id}`} className="btn btn-sm btn-primary">
+                        View Details
+                      </Link>
                     </div>
                   </div>
                 </div>
