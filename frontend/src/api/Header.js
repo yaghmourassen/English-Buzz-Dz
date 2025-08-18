@@ -1,15 +1,11 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:8080/api";
+// src/api/Header.js
+import axiosInstance from "./axiosConfig";
 
 const fetchUserById = async () => {
-  const userId = localStorage.getItem("userId");
-  if (!userId) throw new Error("Aucun ID utilisateur trouvé.");
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  if (!storedUser) return null;
 
-  const response = await axios.get(`${API_URL}/users/${userId}`, {
-    withCredentials: true,
-  });
-
+  const response = await axiosInstance.get(`/users/${storedUser.id}`);
   return response.data;
 };
 

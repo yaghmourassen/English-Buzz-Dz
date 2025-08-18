@@ -1,28 +1,41 @@
-// src/api/ManageUsers.js
+import axiosInstance from "./axiosConfig";
 
+const API_URL = "/users";
+
+// جلب كل المستخدمين
 export const fetchAllUsers = async () => {
-  const res = await fetch('http://localhost:8080/api/users');
-  if (!res.ok) throw new Error('Failed to fetch users');
-  return res.json();
+  const res = await axiosInstance.get(API_URL);
+  return res.data;
 };
 
+// جلب مستخدم حسب الـ ID
+export const fetchUserById = async (id) => {
+  const res = await axiosInstance.get(`${API_URL}/${id}`);
+  return res.data;
+};
+
+// حذف مستخدم
 export const deleteUserById = async (id) => {
-  const res = await fetch(`http://localhost:8080/api/users/${id}`, {
-    method: 'DELETE',
-  });
-  if (!res.ok) throw new Error('Failed to delete user');
+  const res = await axiosInstance.delete(`${API_URL}/${id}`);
+  return res.data;
 };
+
+// تحديث مستخدم (مع MultipartFormData)
 export const updateUserById = async (id, formData) => {
-  const res = await fetch(`http://localhost:8080/api/users/${id}`, {
-    method: 'PUT',
-    body: formData,
+  const res = await axiosInstance.put(`${API_URL}/${id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
   });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error('Failed to update user: ' + errText);
-  }
-
-  return res.json();
+  return res.data;
 };
 
+// تسجيل مستخدم جديد (مع صورة)
+export const registerUser = async (formData) => {
+  const res = await axiosInstance.post(`${API_URL}/register`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return res.data;
+};

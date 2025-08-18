@@ -1,40 +1,40 @@
-// src/api/ManageAnnonces.js
-import axios from 'axios';
+import axiosInstance from "./axiosConfig";
 
-const BASE_URL = 'http://localhost:8080/api/annonces';
+const BASE_URL = "/annonces";
 
-// Fetch all annonces
+// جلب كل الإعلانات
 export const fetchAllAnnonces = async () => {
-  const response = await axios.get(BASE_URL);
-  return response.data;
+  const res = await axiosInstance.get(BASE_URL);
+  return res.data;
 };
 
-// Delete a specific annonce by ID
+// حذف إعلان حسب الـ ID
 export const deleteAnnonceById = async (id) => {
   if (!id) throw new Error("Annonce ID is missing");
-  await axios.delete(`${BASE_URL}/${id}`);
+  const res = await axiosInstance.delete(`${BASE_URL}/${id}`);
+  return res.data;
 };
 
-// Fetch a single annonce by ID
+// جلب إعلان واحد حسب الـ ID
 export const fetchAnnonceById = async (id) => {
   if (!id) throw new Error("Annonce ID is missing");
-  const response = await axios.get(`${BASE_URL}/${id}`);
-  return response.data;
+  const res = await axiosInstance.get(`${BASE_URL}/${id}`);
+  return res.data;
 };
 
-// Update an annonce
+// تحديث إعلان
 export const updateAnnonceById = async (id, formData) => {
   if (!id) throw new Error("Annonce ID is missing");
-  const response = await axios.put(`${BASE_URL}/${id}`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+  const res = await axiosInstance.put(`${BASE_URL}/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
-  return response.data;
+  return res.data;
 };
 
-// Create a new annonce
+// إنشاء إعلان جديد
 export const createAnnonce = async (formData) => {
-  const response = await axios.post(BASE_URL, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
+  const res = await axiosInstance.post(BASE_URL, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
   });
-  return response.data;
+  return res.data;
 };

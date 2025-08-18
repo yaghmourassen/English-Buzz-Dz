@@ -8,8 +8,8 @@ const loginUser = async (email, password) => {
     password,
   });
 
-  // ✅ الآن نرجع فقط كائن المستخدم كما هو
-  return response.data; // مجرد user object
+  // نرجع كائن يحتوي user و token
+  return response.data; // { user: {...}, token: "xxxx" }
 };
 
 export { loginUser };

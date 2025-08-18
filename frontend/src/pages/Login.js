@@ -11,31 +11,32 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
-   setErrorMsg("");
-   setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setLoading(true);
 
-   try {
-     const user = await loginUser(email, password);
+    try {
+      const data = await loginUser(email, password);
 
-     // ✅ خزن المستخدم في localStorage
-     localStorage.setItem("user", JSON.stringify(user));
-     localStorage.setItem("userId", user.id);
+      // ✅ خزن بيانات المستخدم والتوكن في localStorage
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
 
-     // ✅ التوجيه بعد تسجيل الدخول
-     navigate("/Home");
-   } catch (error) {
-     if (error.response && error.response.status === 401) {
-       setErrorMsg("Incorrect email or password.");
-     } else {
-       setErrorMsg("Server connection error.");
-     }
-   } finally {
-     setLoading(false);
-   }
- };
-
+      // ✅ التوجيه بعد تسجيل الدخول
+      navigate("/Home");
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setErrorMsg("Incorrect email or password.");
+      } else if (error.response) {
+        setErrorMsg(`Error ${error.response.status}: ${error.response.data}`);
+      } else {
+        setErrorMsg("Server connection error.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-bg">

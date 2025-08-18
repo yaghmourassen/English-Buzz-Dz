@@ -7,15 +7,18 @@ import './styles/theme.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { ThemeProvider } from './context/ThemeContext'; // ✅ إضافة الاستيراد
+import { ThemeProvider } from './context/ThemeContext';
+import { HelmetProvider } from 'react-helmet-async'; // ✅ Import HelmetProvider
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <ThemeProvider> {/* ✅ تغليف AppRoutes */}
-        <AppRoutes />
-      </ThemeProvider>
+      <HelmetProvider> {/* ✅ Wrap the app for SEO and tab titles */}
+        <ThemeProvider>
+          <AppRoutes />
+        </ThemeProvider>
+      </HelmetProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

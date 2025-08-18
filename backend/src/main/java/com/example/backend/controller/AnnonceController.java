@@ -57,6 +57,8 @@ public class AnnonceController {
         }
     }
 
+
+
     // UPDATE
     // In AnnonceController.java
     @PutMapping("/{id}")

@@ -1,23 +1,22 @@
+import axiosInstance from "./axiosConfig"; // استبدل المسار بمسارك الصحيح
 
-import axios from "axios";
+const API_URL = "/annonces";
 
-const API_URL = "http://localhost:8080/api/annonces";
-
-// جلب جميع الإعلانات (لا يحتاج توكن)
+// جلب جميع الإعلانات (هنا يمكنك تركها بدون توكن إذا الـ endpoint عام)
 export const fetchAnnonces = async () => {
-  const res = await axios.get(API_URL);
+  const res = await axiosInstance.get(API_URL);
   return res.data;
 };
 
 // جلب إعلان حسب الـ ID
 export const fetchAnnonceById = async (id) => {
-  const res = await axios.get(`${API_URL}/${id}`);
+  const res = await axiosInstance.get(`${API_URL}/${id}`);
   return res.data;
 };
 
-// إضافة إعلان (يحتاج تعديل إذا تستخدم MultipartFile)
+// إضافة إعلان (يتطلب توكن)
 export const addAnnonce = async (formData) => {
-  const res = await axios.post(API_URL, formData, {
+  const res = await axiosInstance.post(API_URL, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

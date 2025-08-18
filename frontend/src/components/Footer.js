@@ -6,12 +6,12 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-<footer className="mt-5 pt-4 pb-2">
+    <footer className="mt-5 pt-4 pb-2">
       <div className="container text-center text-md-start">
         <div className="row">
           {/* About Section */}
           <div className="col-md-4 mb-3">
-            <h5 className="text-uppercase">EngiStudy</h5>
+            <h5 className="text-uppercase">English Buzz DZ</h5>
             <p>Empowering engineering students with knowledge, tools, and resources.</p>
           </div>
 
@@ -31,18 +31,18 @@ function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info or Social (Optional) */}
+          {/* Contact Info */}
           <div className="col-md-4 mb-3">
             <h6 className="text-uppercase">Contact</h6>
-            <p>Email: support@engistudy.com</p>
-            <p>Phone: +213 123 456 789</p>
+            <p>Email: <a href="mailto:Bellilmassinissa59@gmail.com" className="text-white text-decoration-none">Bellilmassinissa59@gmail.com</a></p>
+            <p>Phone: <a href="tel:+213561552076" className="text-white text-decoration-none">+213 561 552 076</a></p>
           </div>
         </div>
 
         <hr className="bg-light" />
 
         <div className="text-center">
-          © {currentYear} <strong>EngiStudy</strong>. All rights reserved.
+          © {currentYear} <strong>English Buzz DZ</strong>. All rights reserved.
         </div>
       </div>
     </footer>
