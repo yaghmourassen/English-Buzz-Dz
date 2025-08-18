@@ -36,6 +36,11 @@ public class LoginService {
             return Map.of("error", "Invalid credentials");
         }
 
+        // 🔹 Check if user is active
+        if (!user.isActive()) {
+            return Map.of("error", "Your account is blocked. Contact admin.");
+        }
+
         // توليد التوكن
         String token = jwtUtil.generateToken(user.getEmail());
 
@@ -48,8 +53,10 @@ public class LoginService {
                         "firstName", user.getFirstName(),
                         "lastName", user.getLastName(),
                         "role", user.getRole(),
-                        "imageUrl", user.getImageUrl()
+                        "imageUrl", user.getImageUrl(),
+                        "active", user.isActive() // useful for frontend
                 )
         );
     }
+
 }

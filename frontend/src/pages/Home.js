@@ -20,13 +20,19 @@ function Home() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchAnnonces().then(setAnnonces).catch(console.error);
-    const storedUserId = localStorage.getItem("userId");
-    if (storedUserId) {
-      fetchUserById(storedUserId).then(setUser).catch(() => setUser(null));
-    }
-  }, []);
+useEffect(() => {
+  // Fetch annonces
+  fetchAnnonces()
+    .then(setAnnonces)
+    .catch(console.error);
+
+  // Get user directly
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+  }
+}, []);
+
 
   const filtered = annonces.filter(a => {
     const matchesSearch = a.titre?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -104,15 +110,23 @@ function Home() {
       <Header />
 
       {/* Hero */}
-      <section className="hero text-center py-5">
-        <div className="container">
-          <h1 className="display-4 fw-bold clickable" onClick={handleHomeClick}>
-            English Buzz DZ 📚
-          </h1>
-          <p className="lead">Massi - Buzzing With English Ideas! 💡</p>
-          {user?.role === "ADMIN" && <Link to="/add-annonce" className="btn btn-primary mt-3">➕ Add File</Link>}
-        </div>
-      </section>
+<section className="hero text-center py-5">
+  <div className="container">
+    <h1 className="display-4 fw-bold clickable">
+      English Buzz DZ 📚
+    </h1>
+    <p className="lead">Buzzing With English Ideas! 💡</p>
+
+    {/* Show button only if user is fetched AND role is ADMIN */}
+    {user && user.role === "ADMIN" && (
+      <Link to="/add-annonce" className="btn btn-primary mt-3">
+        ➕ Add File
+      </Link>
+    )}
+  </div>
+</section>
+
+
 
       {/* Categories */}
       <section className="categories-section py-4">

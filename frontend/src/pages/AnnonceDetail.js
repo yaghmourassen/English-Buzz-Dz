@@ -4,8 +4,7 @@ import { useParams, Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '../styles/AnnonceDetails.css';
-import axiosInstance from "../api/axiosConfig"; // <- use the same instance
+import axiosInstance from "../api/axiosConfig";
 
 const AnnonceDetails = () => {
   const { id } = useParams();
@@ -27,9 +26,18 @@ const AnnonceDetails = () => {
         setLoading(false);
       }
     };
-
     fetchAnnonce();
   }, [id]);
+
+  const getTypeStyle = (type) => {
+    switch(type) {
+      case "Course": return { color: "#0d6efd", fontWeight: 600 };
+      case "Book": return { color: "#198754", fontWeight: 600 };
+      case "Exam": return { color: "#ffc107", fontWeight: 600 };
+      case "Resource": return { color: "#0dcaf0", fontWeight: 600 };
+      default: return {};
+    }
+  };
 
   if (loading) return (
     <>
@@ -70,7 +78,12 @@ const AnnonceDetails = () => {
               <div className="card-body">
                 <h2 className="card-title mb-3">{annonce.titre}</h2>
                 <p className="card-text mb-2"><strong>Description:</strong> {annonce.description}</p>
-                <p className="card-text mb-2"><strong>Type:</strong> {annonce.type}</p>
+                <p className="card-text mb-2">
+                  <strong>Type:</strong>
+                  <span style={{ marginLeft: "0.5rem", ...getTypeStyle(annonce.type) }}>
+                    {annonce.type}
+                  </span>
+                </p>
                 <p className="card-text mb-2"><strong>Level:</strong> {annonce.level}</p>
                 <p className="card-text mb-2"><strong>Specialty:</strong> {annonce.specialty}</p>
 
