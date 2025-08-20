@@ -6,6 +6,9 @@ import Footer from "../components/Footer";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axiosInstance from "../api/axiosConfig";
 
+// استخدم BASE_URL الخاص بالـ backend على Render
+const API_BASE_URL = "https://english-buzz-dz-2.onrender.com";
+
 const AnnonceDetails = () => {
   const { id } = useParams();
   const [annonce, setAnnonce] = useState(null);
@@ -69,7 +72,7 @@ const AnnonceDetails = () => {
             <div className="card shadow-sm">
               {annonce.coverImage && (
                 <img
-                  src={`http://localhost:8080${annonce.coverImage}`}
+                  src={`${API_BASE_URL}${annonce.coverImage}`}
                   className="card-img-top"
                   alt={annonce.titre}
                   style={{ objectFit: "cover", maxHeight: "400px" }}
@@ -91,7 +94,7 @@ const AnnonceDetails = () => {
                   <div className="mt-3">
                     <h5>PDF Preview:</h5>
                     <iframe
-                      src={`http://localhost:8080${annonce.pdfFile}`}
+                      src={`${API_BASE_URL}${annonce.pdfFile}`}
                       width="100%"
                       height="500px"
                       title="PDF Preview"

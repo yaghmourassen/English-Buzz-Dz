@@ -1,10 +1,13 @@
 import axios from 'axios';
 
+// استبدل localhost برابط Render المباشر
+const API_URL = "https://english-buzz-dz-2.onrender.com/api";
+
 export const addAnnonce = async (formData) => {
   try {
     const token = localStorage.getItem("token"); // الحصول على التوكن
     const response = await axios.post(
-      "http://localhost:8080/api/annonces",
+      `${API_URL}/annonces`,
       formData,
       {
         headers: {

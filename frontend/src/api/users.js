@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = "http://localhost:8080/api/users";
+// استبدل localhost برابط Backend على Render
+const API_URL = "https://english-buzz-dz-2.onrender.com/api/users";
 
 const getAuthHeader = () => {
   const token = localStorage.getItem("token");

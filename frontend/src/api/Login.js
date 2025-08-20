@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api";
+// استبدل localhost برابط Render المباشر
+const API_URL = "https://english-buzz-dz-2.onrender.com/api";
 
 const loginUser = async (email, password) => {
   const response = await axios.post(`${API_URL}/login`, {

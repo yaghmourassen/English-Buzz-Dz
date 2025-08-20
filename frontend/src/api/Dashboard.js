@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080"; // Adjust as needed
+const BASE_URL = "https://english-buzz-dz-2.onrender.com"; // رابط Backend على Render
 
 export async function fetchDashboardData() {
   try {

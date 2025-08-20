@@ -6,6 +6,9 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+// قاعدة URL للـ backend على Render
+const API_BASE_URL = "https://english-buzz-dz-2.onrender.com";
+
 function AnnonceDetails() {
   const { id } = useParams();
   const [annonce, setAnnonce] = useState(null);
@@ -47,13 +50,13 @@ function AnnonceDetails() {
     );
   }
 
-  // Fix backend file URLs
+  // روابط الملفات مُعدلة للـ backend على Render
   const coverUrl = annonce.coverImage
-    ? `http://localhost:8080${annonce.coverImage}`
+    ? `${API_BASE_URL}${annonce.coverImage}`
     : null;
 
   const pdfUrl = annonce.pdfFile
-    ? `http://localhost:8080${annonce.pdfFile}`
+    ? `${API_BASE_URL}${annonce.pdfFile}`
     : null;
 
   return (

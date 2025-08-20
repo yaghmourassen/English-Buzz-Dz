@@ -8,6 +8,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Helmet } from "react-helmet-async";
 import '../styles/Home.css';
 
+// ضع هنا رابط الـ backend على Render
+const API_BASE_URL = "https://english-buzz-dz-2.onrender.com";
+
 function Home() {
   const [annonces, setAnnonces] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,19 +23,14 @@ function Home() {
 
   const navigate = useNavigate();
 
-useEffect(() => {
-  // Fetch annonces
-  fetchAnnonces()
-    .then(setAnnonces)
-    .catch(console.error);
+  useEffect(() => {
+    fetchAnnonces()
+      .then(setAnnonces)
+      .catch(console.error);
 
-  // Get user directly
-  const storedUser = localStorage.getItem("user");
-  if (storedUser) {
-    setUser(JSON.parse(storedUser));
-  }
-}, []);
-
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
 
   const filtered = annonces.filter(a => {
     const matchesSearch = a.titre?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -109,26 +107,17 @@ useEffect(() => {
 
       <Header />
 
-      {/* Hero */}
-<section className="hero text-center py-5">
-  <div className="container">
-    <h1 className="display-4 fw-bold clickable">
-      English Buzz DZ 📚
-    </h1>
-    <p className="lead">Buzzing With English Ideas! 💡</p>
+      <section className="hero text-center py-5">
+        <div className="container">
+          <h1 className="display-4 fw-bold clickable">English Buzz DZ 📚</h1>
+          <p className="lead">Buzzing With English Ideas! 💡</p>
+          {user && user.role === "ADMIN" && (
+            <Link to="/add-annonce" className="btn btn-primary mt-3">➕ Add File</Link>
+          )}
+        </div>
+      </section>
 
-    {/* Show button only if user is fetched AND role is ADMIN */}
-    {user && user.role === "ADMIN" && (
-      <Link to="/add-annonce" className="btn btn-primary mt-3">
-        ➕ Add File
-      </Link>
-    )}
-  </div>
-</section>
-
-
-
-      {/* Categories */}
+      {/* Categories Section */}
       <section className="categories-section py-4">
         <div className="container">
           <div className="row text-center">
@@ -159,31 +148,24 @@ useEffect(() => {
               </div>
             ))}
 
-            {/* Back/Clear */}
             {(streamFilter || yearFilter || typeFilter!=="All" || searchTerm) && (
               <div className="col-12 mb-4 text-center d-flex justify-content-center gap-3">
-                <div onClick={()=>{
-                  if(typeFilter!=="All") setTypeFilter("All");
-                  else if(streamFilter) setStreamFilter(null);
-                  else setYearFilter(null);
-                }} style={{cursor:"pointer",color:"#0d6efd"}}>🔙 Back</div>
-                <div onClick={()=>{
-                  setYearFilter(null); setStreamFilter(null); setTypeFilter("All"); setSearchTerm("");
-                }} style={{cursor:"pointer",color:"#dc3545"}}>🧹 Clear</div>
+                <div onClick={()=>{ if(typeFilter!=="All") setTypeFilter("All"); else if(streamFilter) setStreamFilter(null); else setYearFilter(null); }} style={{cursor:"pointer",color:"#0d6efd"}}>🔙 Back</div>
+                <div onClick={()=>{ setYearFilter(null); setStreamFilter(null); setTypeFilter("All"); setSearchTerm(""); }} style={{cursor:"pointer",color:"#dc3545"}}>🧹 Clear</div>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      {/* Search */}
+      {/* Search Section */}
       <section className="search-bar py-4">
         <div className="container d-flex flex-column flex-md-row gap-3">
           <input className="form-control" placeholder="🔍 Search for files..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
         </div>
       </section>
 
-      {/* Files / Annonces */}
+      {/* Files / Annonces Section */}
       <section className="py-5">
         <div className="container">
           <h2 className="mb-4 text-center">{yearFilter ? streamFilter || "Select Stream" : "All Files"}</h2>
@@ -192,12 +174,12 @@ useEffect(() => {
               filtered.slice(0, visibleCount).map(a=>(
                 <div className="col-md-4 mb-4" key={a.id}>
                   <div className="card h-100 shadow-sm rounded-3 overflow-hidden">
-                    {a.coverImage && <img src={`http://localhost:8080${a.coverImage}`} className="card-img-top" alt={a.titre} style={{height:"200px",objectFit:"cover"}} />}
+                    {a.coverImage && <img src={`${API_BASE_URL}${a.coverImage}`} className="card-img-top" alt={a.titre} style={{height:"200px",objectFit:"cover"}} />}
                     <div className="card-body d-flex flex-column">
                       <h5 className="card-title">{a.titre}</h5>
                       <p className="card-text">{a.description?.slice(0,100)}...</p>
                       <div className="mt-auto d-flex gap-2 flex-wrap">
-                        {a.pdfFile && <a href={`http://localhost:8080${a.pdfFile}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">View PDF</a>}
+                        {a.pdfFile && <a href={`${API_BASE_URL}${a.pdfFile}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">View PDF</a>}
                         <Link to={`/annonce/${a.id}`} className="btn btn-sm btn-primary">View Details</Link>
                       </div>
                     </div>
@@ -207,7 +189,6 @@ useEffect(() => {
             }
           </div>
 
-          {/* Load More / View Less */}
           <div className="text-center mt-3">
             {!expanded && visibleCount<filtered.length && <button className="btn btn-outline-primary" onClick={loadMore}>⬇️ Load More</button>}
             {expanded && <button className="btn btn-outline-secondary" onClick={viewLess}>🔼 View Less</button>}
