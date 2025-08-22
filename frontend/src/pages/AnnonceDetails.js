@@ -50,13 +50,13 @@ function AnnonceDetails() {
     );
   }
 
-  // روابط الملفات مُعدلة للـ backend على Render
+  // تعديل روابط الملفات لتعمل مع Google Cloud Storage أو روابط backend
   const coverUrl = annonce.coverImage
-    ? `${API_BASE_URL}${annonce.coverImage}`
+    ? (annonce.coverImage.startsWith("http") ? annonce.coverImage : `${API_BASE_URL}${annonce.coverImage}`)
     : null;
 
   const pdfUrl = annonce.pdfFile
-    ? `${API_BASE_URL}${annonce.pdfFile}`
+    ? (annonce.pdfFile.startsWith("http") ? annonce.pdfFile : `${API_BASE_URL}${annonce.pdfFile}`)
     : null;
 
   return (

@@ -8,9 +8,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Helmet } from "react-helmet-async";
 import '../styles/Home.css';
 
-// ضع هنا رابط الـ backend على Render
-const API_BASE_URL = "https://english-buzz-dz-2.onrender.com";
-
 function Home() {
   const [annonces, setAnnonces] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -174,12 +171,13 @@ function Home() {
               filtered.slice(0, visibleCount).map(a=>(
                 <div className="col-md-4 mb-4" key={a.id}>
                   <div className="card h-100 shadow-sm rounded-3 overflow-hidden">
-                    {a.coverImage && <img src={`${API_BASE_URL}${a.coverImage}`} className="card-img-top" alt={a.titre} style={{height:"200px",objectFit:"cover"}} />}
+                    {/* استخدم الرابط المباشر من Google Cloud */}
+                    {a.coverImage && <img src={a.coverImage} className="card-img-top" alt={a.titre} style={{height:"200px",objectFit:"cover"}} />}
                     <div className="card-body d-flex flex-column">
                       <h5 className="card-title">{a.titre}</h5>
                       <p className="card-text">{a.description?.slice(0,100)}...</p>
                       <div className="mt-auto d-flex gap-2 flex-wrap">
-                        {a.pdfFile && <a href={`${API_BASE_URL}${a.pdfFile}`} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">View PDF</a>}
+                        {a.pdfFile && <a href={a.pdfFile} target="_blank" rel="noreferrer" className="btn btn-sm btn-outline-primary">View PDF</a>}
                         <Link to={`/annonce/${a.id}`} className="btn btn-sm btn-primary">View Details</Link>
                       </div>
                     </div>

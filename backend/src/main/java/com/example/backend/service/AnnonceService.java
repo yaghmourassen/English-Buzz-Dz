@@ -2,15 +2,16 @@ package com.example.backend.service;
 
 import com.example.backend.model.Annonce;
 import com.example.backend.repository.AnnonceRepository;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Bucket;
+import com.google.firebase.cloud.StorageClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AnnonceService {
@@ -18,6 +19,31 @@ public class AnnonceService {
     @Autowired
     private AnnonceRepository annonceRepository;
 
+    // ==================== Firebase Upload ====================
+    private String uploadFileToFirebase(MultipartFile file, String folderName) throws IOException {
+        if (file == null || file.isEmpty()) return null;
+
+        Bucket bucket = StorageClient.getInstance().bucket();
+        String blobName = folderName + "/" + file.getOriginalFilename();
+        Blob blob = bucket.create(blobName, file.getInputStream(), file.getContentType());
+
+        // URL temporaire (1 heure)
+        return blob.signUrl(1, TimeUnit.HOURS).toString();
+    }
+
+    private void saveFiles(Annonce annonce, MultipartFile coverImage, MultipartFile pdfFile) throws IOException {
+        if (coverImage != null && !coverImage.isEmpty()) {
+            String imageUrl = uploadFileToFirebase(coverImage, "images");
+            annonce.setCoverImage(imageUrl);
+        }
+
+        if (pdfFile != null && !pdfFile.isEmpty()) {
+            String pdfUrl = uploadFileToFirebase(pdfFile, "pdfs");
+            annonce.setPdfFile(pdfUrl);
+        }
+    }
+
+    // ==================== CREATE ====================
     public Annonce createAnnonce(
             String titre,
             String description,
@@ -37,24 +63,17 @@ public class AnnonceService {
         annonce.setPrix(prix);
         annonce.setType(type);
 
-        if (creator != null && !creator.isEmpty()) {
-            annonce.setCreator(creator);
-        }
-        if (creationDate != null && !creationDate.isEmpty()) {
-            annonce.setCreationDate(creationDate);
-        }
-        if (level != null && !level.isEmpty()) {
-            annonce.setLevel(level);
-        }
-        if (specialty != null && !specialty.isEmpty()) {
-            annonce.setSpecialty(specialty);
-        }
+        if (creator != null && !creator.isEmpty()) annonce.setCreator(creator);
+        if (creationDate != null && !creationDate.isEmpty()) annonce.setCreationDate(creationDate);
+        if (level != null && !level.isEmpty()) annonce.setLevel(level);
+        if (specialty != null && !specialty.isEmpty()) annonce.setSpecialty(specialty);
 
         saveFiles(annonce, coverImage, pdfFile);
 
         return annonceRepository.save(annonce);
     }
 
+    // ==================== READ ====================
     public List<Annonce> getAllAnnonces() {
         return annonceRepository.findAll();
     }
@@ -63,8 +82,7 @@ public class AnnonceService {
         return annonceRepository.findById(id).orElse(null);
     }
 
-    // UPDATE
-    // UPDATE
+    // ==================== UPDATE ====================
     public Annonce updateAnnonce(
             String id,
             String titre,
@@ -72,7 +90,7 @@ public class AnnonceService {
             String level,
             String specialty,
             MultipartFile coverImage,
-            MultipartFile pdfFile  // <-- add pdf
+            MultipartFile pdfFile
     ) throws IOException {
         Annonce annonce = annonceRepository.findById(id).orElse(null);
         if (annonce == null) return null;
@@ -82,62 +100,18 @@ public class AnnonceService {
         if (level != null) annonce.setLevel(level);
         if (specialty != null) annonce.setSpecialty(specialty);
 
-        // Replace cover image if provided
-        if (coverImage != null && !coverImage.isEmpty()) {
-            String uploadDir = System.getProperty("user.dir") + "/uploads";
-            File uploadFolder = new File(uploadDir);
-            if (!uploadFolder.exists()) uploadFolder.mkdirs();
-
-            String imageName = UUID.randomUUID() + "_" + coverImage.getOriginalFilename();
-            String imagePath = uploadDir + "/" + imageName;
-            coverImage.transferTo(new File(imagePath));
-            annonce.setCoverImage("/uploads/" + imageName);
-        }
-
-        // Replace PDF if provided
-        if (pdfFile != null && !pdfFile.isEmpty()) {
-            String uploadDir = System.getProperty("user.dir") + "/uploads";
-            File uploadFolder = new File(uploadDir);
-            if (!uploadFolder.exists()) uploadFolder.mkdirs();
-
-            String pdfName = UUID.randomUUID() + "_" + pdfFile.getOriginalFilename();
-            String pdfPath = uploadDir + "/" + pdfName;
-            pdfFile.transferTo(new File(pdfPath));
-            annonce.setPdfFile("/uploads/" + pdfName);
-        }
+        // Remplace les fichiers si fournis
+        saveFiles(annonce, coverImage, pdfFile);
 
         return annonceRepository.save(annonce);
     }
 
-    // DELETE
+    // ==================== DELETE ====================
     public boolean deleteAnnonce(String id) {
         if (annonceRepository.existsById(id)) {
             annonceRepository.deleteById(id);
             return true;
         }
         return false;
-    }
-
-    // Helper method for file saving
-    private void saveFiles(Annonce annonce, MultipartFile coverImage, MultipartFile pdfFile) throws IOException {
-        String uploadDir = System.getProperty("user.dir") + "/uploads";
-        File uploadFolder = new File(uploadDir);
-        if (!uploadFolder.exists()) {
-            uploadFolder.mkdirs();
-        }
-
-        if (coverImage != null && !coverImage.isEmpty()) {
-            String imageName = UUID.randomUUID() + "_" + coverImage.getOriginalFilename();
-            String imagePath = uploadDir + "/" + imageName;
-            coverImage.transferTo(new File(imagePath));
-            annonce.setCoverImage("/uploads/" + imageName);
-        }
-
-        if (pdfFile != null && !pdfFile.isEmpty()) {
-            String pdfName = UUID.randomUUID() + "_" + pdfFile.getOriginalFilename();
-            String pdfPath = uploadDir + "/" + pdfName;
-            pdfFile.transferTo(new File(pdfPath));
-            annonce.setPdfFile("/uploads/" + pdfName);
-        }
     }
 }
