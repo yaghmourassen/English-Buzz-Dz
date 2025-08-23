@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -14,29 +15,23 @@ import java.io.InputStream;
 public class FirebaseConfig {
 
     @Value("${firebase.credentials.file}")
-    private String firebaseConfigPath; // ex: "firebase-service.json"
+    private String firebaseConfigPath; // ex: /etc/secrets/firebase-service.json
 
     @Value("${firebase.bucket}")
-    private String firebaseBucket; // ex: "files-8c16e.appspot.com"
+    private String firebaseBucket; // ex: files-8c16e.appspot.com
 
     @PostConstruct
     public void initialize() throws IOException {
-        // Lire le fichier JSON depuis le classpath
-        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream(firebaseConfigPath);
-        if (serviceAccount == null) {
-            throw new IOException("Fichier Firebase non trouvé dans le classpath: " + firebaseConfigPath);
-        }
+        // Lire le fichier JSON depuis le chemin absolu (Render Secrets)
+        try (InputStream serviceAccount = new FileInputStream(firebaseConfigPath)) {
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setStorageBucket(firebaseBucket)
+                    .build();
 
-
-        // Créer la configuration Firebase
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .setStorageBucket(firebaseBucket)
-                .build();
-
-        // Initialiser Firebase seulement si ce n'est pas déjà fait
-        if (FirebaseApp.getApps().isEmpty()) {
-            FirebaseApp.initializeApp(options);
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+            }
         }
     }
 }
