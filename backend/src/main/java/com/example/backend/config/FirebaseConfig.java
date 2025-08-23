@@ -7,26 +7,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
-
-    @Value("${firebase.credentials.file}")
-    private String firebaseConfigPath; // ex: "firebase-service.json"
 
     @Value("${firebase.bucket}")
     private String firebaseBucket; // ex: "files-8c16e.appspot.com"
 
     @PostConstruct
     public void initialize() throws IOException {
-        // Lire le fichier JSON depuis le classpath
-        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream(firebaseConfigPath);
-        if (serviceAccount == null) {
-            throw new IOException("Fichier Firebase non trouvé dans le classpath: " + firebaseConfigPath);
-        }
-
+        // Lire le Secret File directement depuis Render
+        FileInputStream serviceAccount = new FileInputStream("/etc/secrets/firebase-service.json");
 
         // Créer la configuration Firebase
         FirebaseOptions options = FirebaseOptions.builder()
