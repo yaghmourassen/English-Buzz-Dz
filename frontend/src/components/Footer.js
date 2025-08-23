@@ -12,7 +12,7 @@ function Footer() {
           {/* About Section */}
           <div className="col-md-4 mb-3">
             <h5 className="text-uppercase">English Buzz DZ</h5>
-            <p>Empowering engineering students with knowledge, tools, and resources.</p>
+            <p>Empowering engineering Teachers with knowledge, tools, and resources.</p>
           </div>
 
           {/* Quick Links */}
