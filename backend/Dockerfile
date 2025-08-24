@@ -7,15 +7,15 @@ WORKDIR /app
 # انسخ كل ملفات المشروع إلى الحاوية
 COPY . .
 
-# إعداد متغيرات البيئة لـ Firebase
-# استبدل القيم بالمسار الصحيح للملف على Render أو اجعلها متغيرة على منصة Render
-ENV FIREBASE_CREDENTIALS=firebase-service.json
-ENV FIREBASE_BUCKET=files-8c16e.appspot.com
-
 # ثبّت Maven وابنِ المشروع مع تجاوز الاختبارات
 RUN apt-get update && apt-get install -y maven \
-    && mvn clean package -DskipTests
+    && mvn clean package -DskipTests \
+    && apt-get clean
+
+# لا تضع هنا FIREBASE_CREDENTIALS، ستضبطه على Render مباشرة كـ environment variable
+# مثال على كيفية تمريره في Render dashboard:
+# Key: FIREBASE_CREDENTIALS
+# Value: {"type":"service_account","project_id":"files-8c16e", ... بقية JSON كامل ...}
 
 # تعيين Jar الذي سيتم تشغيله
-# استبدل 'backend-0.0.1-SNAPSHOT.jar' باسم Jar الناتج من مشروعك
 CMD ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"]
