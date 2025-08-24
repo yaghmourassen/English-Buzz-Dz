@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // استبدل localhost برابط Render المباشر
-const API_URL = "http://localhost:8080/api"; // local Spring Boot backend
+const API_URL = "https://english-buzz-dz-2.onrender.com/api";
 
 export const addAnnonce = async (formData) => {
   try {
