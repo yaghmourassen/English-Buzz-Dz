@@ -7,34 +7,34 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 public class FirebaseConfig {
-
-    @Value("${firebase.credentials.file}")
-    private String firebaseConfigPath; // ex: "firebase-service.json"
 
     @Value("${firebase.bucket}")
     private String firebaseBucket; // ex: "files-8c16e.appspot.com"
 
     @PostConstruct
     public void initialize() throws IOException {
-        // Lire le fichier JSON depuis le classpath
-        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream(firebaseConfigPath);
-        if (serviceAccount == null) {
-            throw new IOException("Fichier Firebase non trouvé dans le classpath: " + firebaseConfigPath);
+        // قراءة متغير البيئة
+        String firebaseCredentials = System.getenv("FIREBASE_CREDENTIALS");
+        if (firebaseCredentials == null || firebaseCredentials.isEmpty()) {
+            throw new RuntimeException("FIREBASE_CREDENTIALS environment variable not set");
         }
 
+        // تحويل النص إلى InputStream
+        ByteArrayInputStream serviceAccount = new ByteArrayInputStream(firebaseCredentials.getBytes(StandardCharsets.UTF_8));
 
-        // Créer la configuration Firebase
+        // إنشاء إعدادات Firebase
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setStorageBucket(firebaseBucket)
                 .build();
 
-        // Initialiser Firebase seulement si ce n'est pas déjà fait
+        // تهيئة Firebase فقط إذا لم يتم تهيئته مسبقًا
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         }
