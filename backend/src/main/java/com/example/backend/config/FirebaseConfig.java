@@ -7,45 +7,34 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
 
-    @Value("${firebase.credentials.file}") // ex: "firebase-service.json"
-    private String firebaseConfigPath;
+    @Value("${firebase.credentials.file}")
+    private String firebaseConfigPath; // ex: "firebase-service.json"
 
-    @Value("${firebase.bucket}") // ex: "files-8c16e.appspot.com"
-    private String firebaseBucket;
+    @Value("${firebase.bucket}")
+    private String firebaseBucket; // ex: "files-8c16e.appspot.com"
 
     @PostConstruct
     public void initialize() throws IOException {
-        InputStream serviceAccount;
-
-        // تحقق أولًا إذا كان Secret File موجود على Render
-        File secretFile = new File("/etc/secrets/firebase-service.json");
-        if (secretFile.exists()) {
-            serviceAccount = new FileInputStream(secretFile);
-            System.out.println("Using Firebase Secret File from Render: " + secretFile.getAbsolutePath());
-        } else {
-            // خلاف ذلك، استخدم الملف المحلي من classpath
-            serviceAccount = getClass().getClassLoader().getResourceAsStream(firebaseConfigPath);
-            if (serviceAccount == null) {
-                throw new IOException("Fichier Firebase non trouvé dans le classpath: " + firebaseConfigPath);
-            }
-            System.out.println("Using local Firebase file: " + firebaseConfigPath);
+        // Lire le fichier JSON depuis le classpath
+        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream(firebaseConfigPath);
+        if (serviceAccount == null) {
+            throw new IOException("Fichier Firebase non trouvé dans le classpath: " + firebaseConfigPath);
         }
 
-        // إعداد Firebase
+
+        // Créer la configuration Firebase
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .setStorageBucket(firebaseBucket)
                 .build();
 
-        // التهيئة فقط إذا لم يكن FirebaseApp موجود مسبقًا
+        // Initialiser Firebase seulement si ce n'est pas déjà fait
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         }
