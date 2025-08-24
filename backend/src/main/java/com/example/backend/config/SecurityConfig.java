@@ -50,11 +50,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // السماح بالوصول من localhost و Vercel
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "https://english-buzz-dz-etx2.vercel.app"
-        ));
+
+        // السماح بالوصول من localhost و أي رابط فرعي على vercel.app
+        configuration.addAllowedOriginPattern("http://localhost:3000");
+        configuration.addAllowedOriginPattern("https://*.vercel.app");
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -63,4 +63,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }
